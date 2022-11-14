@@ -1,0 +1,3 @@
+/Users/teodorosullazzo/Documents/git_repos/myCDBv3/cmake-build-debug/CMakeFiles/myCDBv3.dir
+/Users/teodorosullazzo/Documents/git_repos/myCDBv3/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/teodorosullazzo/Documents/git_repos/myCDBv3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
