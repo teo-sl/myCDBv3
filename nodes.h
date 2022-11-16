@@ -57,6 +57,13 @@ const uint32_t INTERNAL_MAX_KEYS = (INTERNAL_BODY_SIZE-POINTER_SIZE)/(KEY_SIZE+P
 const uint32_t LEAF_RIGHT_SPLIT = (LEAF_MAX_ROWS+1)/2;
 const uint32_t LEAF_LEFT_SPLIT = (LEAF_MAX_ROWS+1)-LEAF_RIGHT_SPLIT;
 
+// split internal
+
+const uint32_t INTERNAL_RIGHT_SPLIT = (INTERNAL_MAX_KEYS+1)/2;
+const uint32_t INTERNAl_LEFT_SPLIT = (INTERNAL_MAX_KEYS+1)-LEAF_RIGHT_SPLIT;
+
+
+
 
 void deserialize_header(void* source, Page_header* destination) {
     memcpy(&(destination->page_num),source+HEADER_PAGE_NUM_OFFSET,HEADER_ELEMENT_SIZE);
@@ -195,6 +202,23 @@ void print_b_tree(void* page, Table* table) {
 }
 
 
+
+void initialize_internal_node(void* page, uint32_t page_num) {
+    Page_header* pageHeader = (Page_header*) page;
+    pageHeader->n_keys=0;
+    pageHeader->node_type=get_internal();
+    pageHeader->page_num=page_num;
+    pageHeader->father_page=NULL_FATHER;
+    pageHeader->is_root=0;
+
+}
+
+void serialize_key(Key_internal keyInternal, void* destination) {
+    Key_internal* keyInternal_dst = (Key_internal*) destination;
+    keyInternal_dst->key_value=keyInternal.key_value;
+    keyInternal_dst->left_page=keyInternal.left_page;
+    keyInternal_dst->right_page=keyInternal.right_page;
+}
 #ifndef MYCDBV3_NODES_H
 #define MYCDBV3_NODES_H
 

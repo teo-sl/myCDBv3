@@ -45,7 +45,6 @@ void db_close(Table* table) {
 
 
 int main() {
-    printf("%d %d %d\n",LEAF_LEFT_SPLIT,LEAF_RIGHT_SPLIT,LEAF_MAX_ROWS);
     Table *table = new_db();
     Read_buffer *read_buffer = new_read_buffer();
     while (true) {
