@@ -16,8 +16,8 @@ uint32_t add_to_father(Table* table, void* page, uint32_t key, uint32_t left_pag
         uint32_t keys_to_move = size-idx;
         void* cell_dst = get_n_key_ptr_internal(page,idx);
         Key_internal* keyInternal = (Key_internal*) (cell_dst-POINTER_SIZE);
-        Key_internal* keyInternal1 = (Key_internal*) cell_dst+KEY_SIZE;
-        memcpy((get_n_key_ptr_internal(page,idx)+KEY_SIZE+POINTER_SIZE),cell_dst,keys_to_move*(KEY_SIZE+POINTER_SIZE));
+        Key_internal* keyInternal1 = (Key_internal*) (cell_dst+KEY_SIZE);
+        memcpy((cell_dst+KEY_SIZE+POINTER_SIZE),cell_dst,keys_to_move*(KEY_SIZE+POINTER_SIZE));
         keyInternal->left_page=left_page_num;
         keyInternal->right_page=right_page_num;
         keyInternal->key_value=key;

@@ -81,7 +81,7 @@ void* get_n_row_ptr_leaf(void* page, uint32_t idx) {
 }
 
 void* get_n_key_ptr_internal(void* page, uint32_t idx) {
-    return page+HEADER_SIZE+POINTER_SIZE+(ROW_SIZE+POINTER_SIZE)*idx;
+    return page+HEADER_SIZE+POINTER_SIZE+(KEY_SIZE+POINTER_SIZE)*idx;
 }
 
 
@@ -170,9 +170,10 @@ void print_b_tree(void* page, Table* table) {
     if(pageHeader->node_type==get_internal()) {
         for(uint32_t i = 0; i<pageHeader->n_keys;++i) {
             void* cell = get_n_key_ptr_internal(page,i);
-            uint32_t  key = *((uint32_t*) cell);
-            uint32_t  left = *((uint32_t*) (cell-POINTER_SIZE));
-            uint32_t  right = *((uint32_t*) (cell+KEY_SIZE));
+            Key_internal* keyInternal  = (Key_internal*) (cell-POINTER_SIZE);
+            uint32_t  key = keyInternal->key_value;
+            uint32_t  left = keyInternal->left_page;
+            uint32_t  right = keyInternal->right_page;
             printf("left: %d value: %d right: %d\n",left,key,right);
             print_b_tree(table->pages[left],table);
             if(i==pageHeader->n_keys-1) {
