@@ -66,9 +66,14 @@ uint32_t  get_row_id(void* source) {
 }
 
 uint32_t get_unused_page(Table* table) {
+    if(table->n_pages>=TABLE_MAX_PAGES) {
+        printf("Limit to max pages reached\n");
+        exit(EXIT_FAILURE);
+    }
     for(uint32_t i = 0; i<TABLE_MAX_PAGES;i++) {
         if(table->pages[i]==NULL) {
             table->pages[i] = malloc(PAGE_SIZE);
+            table->n_pages+=1;
             return i;
         }
     }
@@ -80,6 +85,9 @@ uint32_t  get_leaf() {
 uint32_t  get_internal() {
     return 1;
 }
+
+
+
 #ifndef MYCDBV3_COMMON_H
 #define MYCDBV3_COMMON_H
 

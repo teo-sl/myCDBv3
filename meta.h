@@ -35,7 +35,12 @@ Meta_result prepare_meta_command(Read_buffer *read_buffer, Table *table) {
     if (strcmp(read_buffer->buffer, ".exit") == 0) {
         close_buffer(read_buffer);
         return META_CLOSE;
-    } else {
+
+    } else if(strcmp(read_buffer->buffer,".btree")==0) {
+        print_b_tree(table->pages[table->root_page_num],table);
+        return META_SUCCESS;
+    }
+    else {
         return META_FAIl;
     }
 }

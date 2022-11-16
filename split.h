@@ -7,6 +7,31 @@
 #include <fcntl.h>
 
 
+uint32_t add_to_father(Table* table, void* page, uint32_t key, uint32_t left_page_num, uint32_t right_page_num) {
+    uint32_t  idx = binary_search_internal(page,key);
+    Page_header* pageHeader = (Page_header*) page;
+    uint32_t size = pageHeader->n_keys;
+
+    if(size<INTERNAL_MAX_KEYS) { // add directly
+        uint32_t keys_to_move = size-idx;
+        void* cell_dst = get_n_key_ptr_internal(page,idx);
+        Key_internal* keyInternal = (Key_internal*) (cell_dst-POINTER_SIZE);
+        Key_internal* keyInternal1 = (Key_internal*) cell_dst+KEY_SIZE;
+        memcpy((get_n_key_ptr_internal(page,idx)+KEY_SIZE+POINTER_SIZE),cell_dst,keys_to_move*(KEY_SIZE+POINTER_SIZE));
+        keyInternal->left_page=left_page_num;
+        keyInternal->right_page=right_page_num;
+        keyInternal->key_value=key;
+        uint32_t new_size = size+1;
+        pageHeader->n_keys=new_size;
+        return pageHeader->page_num;
+    }
+    else {
+
+    }
+}
+
+
+
 
 uint32_t create_new_root(Table* table,uint32_t left_page_num,uint32_t right_page_num,uint32_t new_key) {
 
@@ -44,7 +69,6 @@ InsertResult split_leaf(Row *row, Table *table, void *old_page, uint32_t pos) {
         }
         uint32_t idx = i % LEAF_LEFT_SPLIT;
         void *destination = get_n_row_ptr_leaf(destination_node, idx);
-        Row* tmp_rot = get_n_row_ptr_leaf(destination_node,idx);
         if (i == pos) {
             serialize_row(row, destination);
         } else if (i > pos) {
@@ -69,16 +93,16 @@ InsertResult split_leaf(Row *row, Table *table, void *old_page, uint32_t pos) {
         uint32_t root_page = create_new_root(table, pageHeader_old->page_num, pageHeader_new->page_num, new_key);
         pageHeader_old->father_page = root_page;
         pageHeader_new->father_page = root_page;
+        pageHeader_old->is_root=0;
         return INSERT_SUCCESS;
     }
 
-    /*
     else {
-        uint32_t  father_page = add_to_father(table,table->pages[pageHeader_old->father_page],new_key);
+        uint32_t  father_page = add_to_father(table,table->pages[pageHeader_old->father_page],new_key,pageHeader_old->page_num,pageHeader_new->page_num);
         pageHeader_old->father_page=father_page;
         pageHeader_new->father_page=father_page;
+        return INSERT_SUCCESS;
     }
-     */
 
 }
 

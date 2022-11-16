@@ -24,6 +24,12 @@ typedef struct {
     uint32_t father_page;
 } Page_header;
 
+typedef struct {
+   uint32_t left_page;
+   uint32_t key_value;
+   uint32_t right_page;
+} Key_internal;
+
 
 // common header
 
@@ -134,6 +140,55 @@ void print_page_internal(void* page) {
         void* left = cell-POINTER_SIZE;
         void* right = cell+KEY_SIZE;
         printf("left: %d value : %d right: %d\n",*((uint32_t*)left),*((uint32_t*)cell),*((uint32_t*)right));
+    }
+
+}
+
+uint32_t binary_search_internal(void* page, uint32_t key) {
+    uint32_t low = 0;
+    uint32_t high = ((Page_header*) page)->n_keys;
+
+    while(low!=high) {
+        uint32_t mid = (low+high)/2;
+        void* cell_mid = get_n_key_ptr_internal(page,mid);
+        uint32_t mid_value =*((uint32_t*) cell_mid);
+        if(key==mid_value) {
+            return mid;
+        }
+        else if(key>mid_value) {
+            low=mid+1;
+        }
+        else {
+            high=mid;
+        }
+    }
+    return low;
+}
+
+void print_b_tree(void* page, Table* table) {
+    Page_header* pageHeader = (Page_header*) page;
+    if(pageHeader->node_type==get_internal()) {
+        for(uint32_t i = 0; i<pageHeader->n_keys;++i) {
+            void* cell = get_n_key_ptr_internal(page,i);
+            uint32_t  key = *((uint32_t*) cell);
+            uint32_t  left = *((uint32_t*) (cell-POINTER_SIZE));
+            uint32_t  right = *((uint32_t*) (cell+KEY_SIZE));
+            printf("left: %d value: %d right: %d\n",left,key,right);
+            print_b_tree(table->pages[left],table);
+            if(i==pageHeader->n_keys-1) {
+                print_b_tree(table->pages[right],table);
+            }
+        }
+    }
+    else if(pageHeader->node_type==get_leaf()) {
+        for(uint32_t i = 0; i<pageHeader->n_keys;++i) {
+            void* cell = get_n_row_ptr_leaf(page,i);
+            printf("%d : ",pageHeader->page_num);
+            print_row((Row*) cell);
+        }
+    }
+    else {
+        printf("Error when printing btree, bad format\n");
     }
 
 }

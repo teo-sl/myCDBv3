@@ -33,26 +33,7 @@ uint32_t binary_search_leaf(void* page, uint32_t key) {
     return low;
 }
 
-uint32_t binary_search_internal(void* page, uint32_t key) {
-    uint32_t low = 0;
-    uint32_t high = ((Page_header*) page)->n_keys;
 
-    while(low!=high) {
-        uint32_t mid = (low+high)/2;
-        void* cell_mid = get_n_key_ptr_internal(page,mid);
-        uint32_t mid_value =((uint32_t*) cell_mid);
-        if(key==mid_value) {
-            return mid;
-        }
-        else if(key>mid_value) {
-            low=mid+1;
-        }
-        else {
-            high=mid;
-        }
-    }
-    return low;
-}
 
 void* find_page_with_key(uint32_t key, Table* table, void* page) {
     Page_header*  pageHeader = ((Page_header*) page);
@@ -66,11 +47,11 @@ void* find_page_with_key(uint32_t key, Table* table, void* page) {
     uint32_t size=pageHeader->n_keys;
     if(key_idx>=size) {
         void* cell = get_n_key_ptr_internal(page,key_idx-1);
-        uint32_t  page_son = *((uint32_t*)cell+ROW_SIZE);
+        uint32_t  page_son = *((uint32_t*)(cell+POINTER_SIZE));
         return find_page_with_key(key,table,table->pages[page_son]);
     }
     void* cell = get_n_key_ptr_internal(page,key_idx);
-    uint32_t page_son = *((uint32_t*)cell-POINTER_SIZE);
+    uint32_t page_son = *((uint32_t*)(cell-POINTER_SIZE));
     return find_page_with_key(key,table,table->pages[page_son]);
 }
 
@@ -84,12 +65,11 @@ InsertResult execute_insert(Row* row, Table* table) {
     uint32_t  idx = binary_search_leaf(page,row->id);
     Row* cell_row_idx = (Row*) get_n_row_ptr_leaf(page,idx);
     uint32_t key_idx = get_row_id(cell_row_idx);
-
-    if(key_idx==row->id) {
-        return INSERT_DUPLICATED_KEY;
+    uint32_t size = pageHeader->n_keys;
+    if (key_idx == row->id) {
+            return INSERT_DUPLICATED_KEY;
     }
 
-    uint32_t size = pageHeader->n_keys;
 
     if(size>=LEAF_MAX_ROWS) {
         return split_leaf(row,table,page,idx);
@@ -101,13 +81,8 @@ InsertResult execute_insert(Row* row, Table* table) {
 
     serialize_row(row,cell_row_idx);
 
-
-
     uint32_t new_size = size+1;
     pageHeader->n_keys=new_size;
-
-
-
 
     return INSERT_SUCCESS;
 }
